@@ -33,8 +33,11 @@ var getAccessToken = function() {
 
 var getWallFeeds = function(link, args) {
   // 해당 페이지 게시물 수집
-  FB.api(link, 'get', args, function(res) {
-    if(res.error) throw res.error;
+  FB.api(link + '/posts', 'get', args, function(res) {
+    if(res.error) {
+      console.log(res.error);
+      process.exit(1);
+    }
 
     var data = res.data;
 
