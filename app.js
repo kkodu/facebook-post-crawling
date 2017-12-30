@@ -36,13 +36,13 @@ var getWallFeeds = function(link, args) {
   FB.api(link + '/posts', 'get', args, function(res) {
     if(res.error) {
       console.log(res.error);
-      process.exit(1);
+      process.exit(1); // 프로세스 종료
     }
 
-    var data = res.data;
+    var data = res.data; // 요청 data 
 
     console.log(res.data);
-    if(res.paging.next !== undefined)
+    if(res.paging.next !== undefined) // 다음 피드가 있는 경우
       console.log(res.paging.next);
   });
 };
