@@ -49,7 +49,15 @@ var getAccessToken = function() {
   });
 };
 
+// limit request count
+var lrc = (function() {
+  var count = 0;
+  return count;
+}());
+
 var getPagePosts = function(link, args) {
+  if(lrc > 2) process.exit(1);
+
   // 해당 페이지 게시물 수집
   FB.api(link + '/posts', 'get', args, function(res) {
     if(res.error) {
@@ -58,7 +66,7 @@ var getPagePosts = function(link, args) {
     }
 
     var data = res.data; // 요청 data
-    console.log(res);
+    console.log(`\n[${lrc}]-----------------------------------------------------------\n`, data);
 
     // 다음 피드가 있는 경우
     if(res.paging && res.paging.next !== undefined) {
@@ -69,6 +77,7 @@ var getPagePosts = function(link, args) {
       };
       nextArgs.args.after = nextLinkParts.query.after;
       nextArgs.args.access_token = nextLinkParts.query.access_token;
+      lrc++;
 
       npEmitter.emit('event', nextArgs); // 이벤트를 통한 다음 요청 전달
     }
@@ -76,7 +85,7 @@ var getPagePosts = function(link, args) {
 };
 
 npEmitter.on('event', function(req) {
-	console.log('----------------------------------------------------------');
+	console.log('------------------------------------------------------------------');
   getPagePosts(req.link, req.args); // 다음 요청 실행
 });
 
