@@ -10,12 +10,33 @@ var EventEmitter = require('events');
 var util = require('util');
 var url = require('url');
 
+// 추가 피드 요청 이벤트 에미터
 function nextPostEmitter() {
 	EventEmitter.call(this);
 }
 util.inherits(nextPostEmitter, EventEmitter);
 
+// 몽구스 접속 후 페이스북 토큰 요청 이벤트 에미터
+function nextMongoEmitter() {
+  EventEmitter.call(this);
+}
+util.inherits(nextMongoEmitter, EventEmitter);
+
 var npEmitter = new nextPostEmitter();
+var nmEmitter = new nextMongoEmitter();
+
+/* 몽구스 설정 */
+var mongoose = require('mongoose');
+var mg_config = require('./config/mg-config.json');
+mongoose.Promise = global.Promise;
+
+var conn = mongoose.connection;
+conn.on("error", console.error.bind(console, "mongoose connection error! --"));
+conn.openUri(`mongodb://${mg_config.userId}:${mg_config.userPass}@${mg_config.userLocal}/${mg_config.db}`);
+conn.once("open", function() {
+  console.log("mongoose successfully connected @");
+  nmEmitter.emit('req-fb-access', "event request received.. starts getting facebook access token");
+});
 
 
 /* 페이스북 설정 */
@@ -84,19 +105,23 @@ var getPagePosts = function(link, args) {
   });
 };
 
+// 추가 피드 요청 이벤트 응답
 npEmitter.on('event', function(req) {
 	console.log('------------------------------------------------------------------');
   getPagePosts(req.link, req.args); // 다음 요청 실행
 });
 
-
-// Promise 실행
-getAccessToken().then(
-  function(accessToken) {
-    FB.setAccessToken(accessToken) // 동기 처리
-    console.log("Access Token set")
-    getPagePosts(pageLink, args); // 포스트 요청
-  },
-  function(error) {
-    console.log(error);
-  });
+// 몽구스 접속 후 이벤트 발생을 통한 페이스북 크롤링
+nmEmitter.on('req-fb-access', function(msg) {
+  console.log(msg);
+  // Promise 실행
+  getAccessToken().then(
+    function(accessToken) {
+      FB.setAccessToken(accessToken) // 동기 처리
+      console.log("Access Token set")
+      getPagePosts(pageLink, args); // 포스트 요청
+    },
+    function(error) {
+      console.log(error);
+    });
+});
