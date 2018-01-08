@@ -28,6 +28,7 @@ var nmEmitter = new nextMongoEmitter();
 /* 몽구스 설정 */
 var mongoose = require('mongoose');
 var mg_config = require('./config/mg-config.json');
+var MODEL = require('./model/fbpostmodel.js');
 mongoose.Promise = global.Promise;
 
 var conn = mongoose.connection;
