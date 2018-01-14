@@ -5,16 +5,6 @@ app.listen(3000, function(req, res) {
   console.log("Server starts on port 3000");
 });
 
-var EVENT = require('events');
-var util = require('util');
-
-function eventEmitter() {
-  EVENT.call(this);
-}
-util.inherits(eventEmitter, EVENT);
-
-var nextEmitter = new eventEmitter();
-
 var fb_config = require('./config/fb-config.json');
 var FacebookPost = require('./src/fb-post');
 
@@ -25,5 +15,5 @@ var args = {
   limit: 10
 };
 
-var fbposts = new FacebookPost(pageLink, args, nextEmitter);
-fbposts.getAccessToken(fb_config);
+var fbposts = new FacebookPost(pageLink, args);
+fbposts.accessPage(fb_config);

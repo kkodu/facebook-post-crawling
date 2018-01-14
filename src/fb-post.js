@@ -3,10 +3,21 @@ var FB = require('fb'),
     util = require('util'),
     url = require('url');
 
-function FacebookPost(link, args, nextEmitter) {
+function FacebookPost(link, args) {
   this.link = link;
   this.args = args;
-  this.nm = nextEmitter;
+  this.nm = (function() {
+    var eventEmitter = function() {
+      EVENT.call(this);
+    }
+    util.inherits(eventEmitter, EVENT);
+
+    return new eventEmitter();
+  }());
+
+  this.setArgs = function(next_args) {
+    this.args = next_args.args;
+  }
 
   this.nm.on("access-error", function(error) {
     console.log(error);
@@ -16,17 +27,16 @@ function FacebookPost(link, args, nextEmitter) {
   this.nm.on("access-ok", function(access_token, this_post) {
     FB.setAccessToken(access_token);
     console.log("Access Token set");
-    this_post.__proto__.getPagePosts(this_post.link, this_post.args); // 포스트 요청
+    this_post.__proto__.getPagePosts(this_post); // 포스트 요청
   });
 
-  this.nm.on('next-post', function(req, this_post) {
+  this.nm.on('next-post', function(this_post) {
   	console.log('------------------------------------------------------------------');
-    this_post.__proto__.getPagePosts(req.link, req.args); // 다음 요청 실행
+    this_post.__proto__.getPagePosts(this_post); // 다음 요청 실행
   });
-
 }
 
-FacebookPost.prototype.getAccessToken = function(fb_config) {
+FacebookPost.prototype.accessPage = function(fb_config) {
   var this_post = this;
   var nextEmitter = this.nm;
   FB.api('oauth/access_token', {
@@ -42,12 +52,10 @@ FacebookPost.prototype.getAccessToken = function(fb_config) {
   });
 }
 
-FacebookPost.prototype.getPagePosts = function(link, args) {
-  var this_post = this;
-  var nextEmitter = this.nm;
-  console.log(this);
-  console.log(nextEmitter);
-  FB.api(link + '/posts', 'get', args, function(res) {
+FacebookPost.prototype.getPagePosts = function(this_post) {
+  var _this = this_post;
+  var nextEmitter = _this.nm;
+  FB.api(_this.link + '/posts', 'get', _this.args, function(res) {
     if(res.error) {
       console.log(res.error);
       process.exit(1); // 프로세스 종료
@@ -60,13 +68,13 @@ FacebookPost.prototype.getPagePosts = function(link, args) {
     if(res.paging && res.paging.next !== undefined) {
       var nextLinkParts = url.parse(res.paging.next, true); // url 파싱을 통한 다음 포스트 토큰과 액세스 토큰 분리
       var nextArgs = {
-        link: link,
-        args: args
+        args: _this.args
       };
       nextArgs.args.after = nextLinkParts.query.after;
       nextArgs.args.access_token = nextLinkParts.query.access_token;
+      _this.setArgs(nextArgs);
 
-      nextEmitter.emit('next-post', nextArgs, this_post); // 이벤트를 통한 다음 요청 전달
+      nextEmitter.emit('next-post', _this); // 이벤트를 통한 다음 요청 전달
     }
   });
 }
