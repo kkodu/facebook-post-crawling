@@ -34,11 +34,17 @@ function FacebookPost(link, args) {
     this_post.__proto__.getPagePosts(this_post); // 다음 요청 실행
   });
 
-  this.nm.on('data-obj', function(data) {
-    if(!data) {
-
+  this.nm.on('data-obj', function(data, this_post) {
+    if(!Array.isArray(data)) {
+      console.log(">> end point of data!!");
+      process.exit(1);
+    } else {
+      for(index in data) {
+        var id = data[index].id;
+        this_post.__proto__.getPostSub(id, this_post);
+      }
     }
-  })
+  });
 }
 
 FacebookPost.prototype.accessPage = function(fb_config) {
@@ -55,7 +61,7 @@ FacebookPost.prototype.accessPage = function(fb_config) {
     else
       nextEmitter.emit('access-ok', response.access_token, this_post);
   });
-}
+};
 
 FacebookPost.prototype.getPagePosts = function(this_post) {
   var _this = this_post;
@@ -72,7 +78,7 @@ FacebookPost.prototype.getPagePosts = function(this_post) {
     console.log("-----------------------------------------------------------------------------");
 
     // 데이터 묶음을 전송하여 각 게시물의 좋아요, 댓글, 반응을 호출하도록 유도
-    nextEmitter.emit('data-obj', data);
+    nextEmitter.emit('data-obj', data, this_post);
 
     // 다음 피드가 있는 경우
     if(res.paging && res.paging.next !== undefined) {
@@ -86,6 +92,23 @@ FacebookPost.prototype.getPagePosts = function(this_post) {
 
       nextEmitter.emit('next-post', _this); // 이벤트를 통한 다음 요청 전달
     }
+  });
+};
+
+FacebookPost.prototype.getPostSub = function(id, this_post) {
+  var typeSet = ["likes", "comments", "reactions"];
+  for(index in typeSet)
+    this_post.__proto__.reqFbApi(id, typeSet[index], this_post);
+};
+
+FacebookPost.prototype.reqFbApi = function(id, type, this_post) {
+  FB.api(id + '/' + type, 'get', function(res) {
+    if(res.error) { console.log(res.error); process.exit(1); }
+
+    console.log("[post " + type + "]-----------------------------------------------------------------");
+    if(res.data) console.log(res.data);
+    else console.log("cannot find " + type);
+    console.log("-----------------------------------------------------------------------------");
   });
 }
 
