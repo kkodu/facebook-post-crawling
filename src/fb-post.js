@@ -19,21 +19,26 @@ function FacebookPost(link, args) {
     this.args = next_args.args;
   }
 
-  this.nm.on("access-error", function(error) {
+  this.nm.on('access-error', function(error) {
     console.log(error);
     process.exit(1);
   });
 
-  this.nm.on("access-ok", function(access_token, this_post) {
+  this.nm.on('access-ok', function(access_token, this_post) {
     FB.setAccessToken(access_token);
     console.log("Access Token set");
     this_post.__proto__.getPagePosts(this_post); // 포스트 요청
   });
 
   this.nm.on('next-post', function(this_post) {
-  	console.log('------------------------------------------------------------------');
     this_post.__proto__.getPagePosts(this_post); // 다음 요청 실행
   });
+
+  this.nm.on('data-obj', function(data) {
+    if(!data) {
+
+    }
+  })
 }
 
 FacebookPost.prototype.accessPage = function(fb_config) {
@@ -46,9 +51,9 @@ FacebookPost.prototype.accessPage = function(fb_config) {
   },
   function(response) {
     if(response.error)
-      nextEmitter.emit("access-error", response.error);
+      nextEmitter.emit('access-error', response.error);
     else
-      nextEmitter.emit("access-ok", response.access_token, this_post);
+      nextEmitter.emit('access-ok', response.access_token, this_post);
   });
 }
 
@@ -62,7 +67,12 @@ FacebookPost.prototype.getPagePosts = function(this_post) {
     }
 
     var data = res.data; // 요청 data
+    console.log("[page post]------------------------------------------------------------------");
     console.log(data);
+    console.log("-----------------------------------------------------------------------------");
+
+    // 데이터 묶음을 전송하여 각 게시물의 좋아요, 댓글, 반응을 호출하도록 유도
+    nextEmitter.emit('data-obj', data);
 
     // 다음 피드가 있는 경우
     if(res.paging && res.paging.next !== undefined) {

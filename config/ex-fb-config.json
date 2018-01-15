@@ -1,0 +1,5 @@
+{
+  "clientId" : "FBDEV_CLIENT_ID",
+  "clientSecret" : "FBDEV_CLIENT_SECRET",
+  "grantType" : "client_credentials"
+}
