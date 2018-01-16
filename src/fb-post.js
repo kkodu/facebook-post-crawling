@@ -22,7 +22,6 @@ function FacebookPost(link, args) {
         };
     nextArgs.args.after = nextLinkParts.query.after;
     nextArgs.args.access_token = nextLinkParts.query.access_token;
-
     return nextArgs;
   };
 
@@ -40,7 +39,6 @@ function FacebookPost(link, args) {
   this.nm.on('next-args', function(set, _this) {
     var args = _this.getNextArgs(set.nextLink);
     set.next = args;
-
     _this.__proto__.getNextFeed(set, _this);
   });
 
@@ -79,27 +77,28 @@ FacebookPost.prototype.getPagePosts = function(_this) {
 
 FacebookPost.prototype.getPostSub = function(id, _this) {
   // likes의 경우 reactions에 포함이 되므로 현재 생략
-  var typeSet = ["comments", "reactions"];
+  var typeSet = ['comments', 'reactions'];
   for(var index in typeSet)
-    _this.__proto__.reqFbApi(id, typeSet[index], _this.agrs, _this);
+    _this.__proto__.reqFbApi(id, typeSet[index], _this.args, _this);
 };
 
 FacebookPost.prototype.getNextFeed = function(set, _this) {
-  if(set["type"] === 'posts')
+  if(set.type === 'posts')
     _this.__proto__.reqFbApi(_this.link, set.type, set.next.args, _this);
-  else
+  else {
     _this.__proto__.reqFbApi(set.token, set.type, set.next.args, _this);
+  }
 };
 
 FacebookPost.prototype.reqFbApi = function(token, type, args, _this) {
   var nextEmitter = _this.nm;
   FB.api(token + '/' + type, 'get', args, function(res) {
     if(res.error) { console.log(res.error); process.exit(1); }
-    console.log(token + ' :: ' + type);
-    // console.log("[type: " + type + "]-----------------------------------------------------------------");
-    // if(res.data) console.log(res.data);
-    // else console.log("cannot find " + type);
-    // console.log("-----------------------------------------------------------------------------");
+
+    console.log("[type: " + type + "]-----------------------------------------------------------------");
+    if(res.data) console.log(res.data);
+    else console.log("cannot find " + type);
+    console.log("-----------------------------------------------------------------------------");
 
     if(type === 'posts')
       nextEmitter.emit('data-obj', res.data, _this);

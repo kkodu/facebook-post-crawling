@@ -11,8 +11,7 @@ var FacebookPost = require('./src/fb-post');
 var pageLink = "973432719345219"; // 크롤링 하려는 공개 페이지 토큰
 var args = {
   // 가져올 데이터 설정
-  fields: ['id', 'object_id', 'properties', 'from', 'message', 'link', 'created_time', 'full_picture', 'source'],
-  limit: 10
+  fields: ['id', 'from', 'message', 'link', 'created_time', 'full_picture', 'source']
 };
 
 var fbposts = new FacebookPost(pageLink, args);
