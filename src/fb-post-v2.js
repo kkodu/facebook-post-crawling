@@ -15,13 +15,17 @@ function FacebookPost(link, args) {
     return new eventEmitter();
   }());
 
-  this.getNextArgs = function(link) {
+  this.setToken = function(token) {
+    this.args.access_token = token;
+  }
+
+  this.getNextArgs = function(link, args) {
     var nextLinkParts = url.parse(link, true), // url 파싱을 통한 다음 포스트 토큰과 액세스 토큰 분리
         nextArgs = {
-          args: this.args
+          after: nextLinkParts.query.after,
+          access_token: args.access_token
         };
-    nextArgs.args.after = nextLinkParts.query.after;
-    nextArgs.args.access_token = nextLinkParts.query.access_token;
+
     return nextArgs;
   };
 
@@ -33,12 +37,12 @@ function FacebookPost(link, args) {
   this.nm.on('access-ok', function(access_token, _this) {
     FB.setAccessToken(access_token);
     console.log("Access Token set");
+    _this.setToken(access_token);
     _this.__proto__.getPagePosts(_this); // 포스트 요청
   });
 
   this.nm.on('next-args', function(set, _this) {
-    var args = _this.getNextArgs(set.nextLink);
-    set.next = args;
+    //
     _this.__proto__.getNextFeed(set, _this);
   });
 
@@ -77,36 +81,50 @@ FacebookPost.prototype.getPagePosts = function(_this) {
 
 FacebookPost.prototype.getPostSub = function(id, _this) {
   // likes의 경우 reactions에 포함이 되므로 현재 생략
-  var typeSet = ['comments', 'reactions'];
-  for(var index in typeSet)
-    _this.__proto__.reqFbApi(id, typeSet[index], _this.args, _this);
+  var reactionArgs = {
+    fields: ['id', 'name', 'type']
+  };
+
+  _this.__proto__.reqFbApi(id, 'comments', _this.args, _this);
+  _this.__proto__.reqFbApi(id, 'reactions', reactionArgs, _this);
 };
 
 FacebookPost.prototype.getNextFeed = function(set, _this) {
   if(set.type === 'posts')
-    _this.__proto__.reqFbApi(_this.link, set.type, set.next.args, _this);
+    _this.__proto__.reqFbApi(_this.link, set.type, set.args, _this);
   else {
-    _this.__proto__.reqFbApi(set.token, set.type, set.next.args, _this);
+    _this.__proto__.reqFbApi(set.token, set.type, set.args, _this);
   }
 };
 
 FacebookPost.prototype.reqFbApi = function(token, type, args, _this) {
   var nextEmitter = _this.nm;
+  // console.log("token: " + token, " type: " + type);
   FB.api(token + '/' + type, 'get', args, function(res) {
     if(res.error) { console.log(res.error); process.exit(1); }
+    if(res.data[0] === undefined) return;
 
+    var data = res.data;
     console.log("[type: " + type + "]-----------------------------------------------------------------");
-    if(res.data) console.log(res.data);
-    else console.log("cannot find " + type);
+    console.log(data);
     console.log("-----------------------------------------------------------------------------");
 
+    // 이 코드에서 문제가 생김 => 댓글 좋아요등의 요청은 args에 after만 주면 됨..이걸 몰랐음
     if(type === 'posts')
-      nextEmitter.emit('data-obj', res.data, _this);
+      nextEmitter.emit('data-obj', data, _this);
 
     // 다음 피드가 있는 경우
-    if(res.paging && res.paging.next !== undefined) {
+    if(res.paging) {
+      if(res.paging.next) {
+        var nextArgs = _this.getNextArgs(res.paging.next, _this.args);
+      } else {
+        var nextArgs = {
+          after: res.paging.cursors.after,
+          access_token: _this.args.access_token
+        }
+      }
       var set = {
-        nextLink: res.paging.next,
+        args: nextArgs,
         type: type,
       };
       if(type !== 'posts') set.token = token;

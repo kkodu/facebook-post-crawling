@@ -6,7 +6,7 @@ app.listen(3000, function(req, res) {
 });
 
 var fb_config = require('./config/fb-config.json');
-var FacebookPost = require('./src/fb-post');
+var FacebookPost = require('./src/fb-post-v2');
 
 var pageLink = "973432719345219"; // 크롤링 하려는 공개 페이지 토큰
 var args = {
