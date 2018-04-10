@@ -1,17 +1,17 @@
 # facebook-post-crawling
 Facebook API를 사용한 공개 페이지 게시물 크롤링
 
- * 최신 업데이트..
+ * 최신 업데이트  
 ## 2018년 3월 22일 페이스북 뉴스 - 페이스북 페이지 크롤링 기능이 중단되었다..
-페이스북은 페이지 크롤링으로 인한 정보 남용을 막기 위해 공개페이지의 데이터를 요청하는 기능들을 모두 막아놨다.  
+페이스북은 페이지 크롤링으로 인한 정보 남용을 막기 위해 공개페이지의 데이터를 요청하는 기능들을 모두 막아놨다.    
 API 요청 시, 아래의 오류 정보를 보여주며 앞으로의 사용 가능성에 대해서는 알 수 없다..
 ```
 (#200) Access to this data is temporarily disabled for non-active apps or apps that have not recently accessed this data due to changes we are making to the Facebook Platform. https://developers.facebook.com/status/issues/205942813488872/'
 ```
 page 'post', 'feed' etc... deprecated  
-
-deprecated 전 사용법  
-##### * Facebook Developers 페이지에서 Facebook 아이디와 시크릿 토큰을 발급  
+  
+## deprecated 전 사용법  
+#### * Facebook Developers 페이지에서 Facebook 아이디와 시크릿 토큰을 발급  
 
 ```
 npm install
