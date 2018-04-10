@@ -1,27 +1,26 @@
 # facebook-post-crawling
 Facebook API를 사용한 공개 페이지 게시물 크롤링
 
- * 최신 업데이트  
+ * 최신 업데이트   
 ## 2018년 3월 22일 페이스북 뉴스 - 페이스북 페이지 크롤링 기능이 중단되었다..
-페이스북은 페이지 크롤링으로 인한 정보 남용을 막기 위해 공개페이지의 데이터를 요청하는 기능들을 모두 막아놨다. 
-#
-API 요청 시, 아래의 오류 정보를 보여주며 앞으로의 사용 가능성에 대해서는 알 수 없다..
+페이스북은 페이지 크롤링으로 인한 정보 남용을 막기 위해 공개페이지의 데이터를 요청하는 기능들을 모두 막아놨다.    
+API 요청 시, 아래의 오류 정보를 보여주며 앞으로의 사용 가능성에 대해서는 알 수 없다..   
 ```
 (#200) Access to this data is temporarily disabled for non-active apps or apps that have not recently accessed this data due to changes we are making to the Facebook Platform. https://developers.facebook.com/status/issues/205942813488872/'
 ```
-page 'post', 'feed' etc... deprecated  
-#  
+page 'post', 'feed' etc... deprecated    
+  
 ## deprecated 전 사용법  
-#### * Facebook Developers 페이지에서 Facebook 아이디와 시크릿 토큰을 발급  
+#### * Facebook Developers 페이지에서 Facebook 아이디와 시크릿 토큰을 발급    
 
 ```
 npm install
 - set facebook-config (원하는 config 설정 방식 사용)
 - [option] set db-config (원하는 db, config 설정, 예제는 mongoDB를 사용)
 node app.js or node index.js
-```
-#
-## 설정
+```   
+
+## 설정      
 
 #### set facebook-config
 ./config/ex-fb-config.json 수정
@@ -34,8 +33,8 @@ node app.js or node index.js
 ```
 1. clientId : 페이스북 개발자 아이디
 2. clientSecret : 페이스북 개발자 시크릿 토큰
-3. grantType : "client_credentials"를 사용  
-#
+3. grantType : "client_credentials"를 사용    
+
 #### set db-config (MongoDB 사용)
 ./model/fbpostmodel.js 수정
 ```
@@ -52,20 +51,20 @@ var schema = new mongoose.Schema({
   versionKey: false
 });
 ```
-순서대로 게시물ID, 페이지정보, 게시물내용, 포스팅시간, 사진, 사진링크, 동영상을 저장  
-#
-저장하고 싶은 타입으로 형식을 변경하면 된다.  
-#
-## 테스트 실행
-#
+순서대로 게시물ID, 페이지정보, 게시물내용, 포스팅시간, 사진, 사진링크, 동영상을 저장    
+
+저장하고 싶은 타입으로 형식을 변경하면 된다.     
+
+## 테스트 실행   
+
 #### 공개페이지 토큰 설정
 페이지 요청을 위한 토큰값은 리눅스에서 curl 명령을 사용하여 얻었다.
 
 * curl -skA "Mozilla/5.0" https://www.facebook.com/PAGE_NAME/ | grep -oE "fb://[^\"]+"
 ```
 var pageLink = ""; // 타겟 공개페이지의 토큰 값
-```
-#
+```   
+
 #### 요청 인자 설정
 원하는 데이터를 설정한다. Facebook Graph API 참조
 ```
@@ -82,17 +81,16 @@ limit: 10
 * created_time : 포스팅 날짜
 * full_picture : 원본 사진
 * source : 동영상
-요청 시, 해당하는 속성이 없으면 반환하지 않는다.  
-#
+요청 시, 해당하는 속성이 없으면 반환하지 않는다.     
+
 #### node index.js
 * 기본적인 게시물 크롤링
 * limit=25개의 게시물을 한 번만 요청
-* DB 설정과 이벤트 에미터, 카운트 등 모두 주석처리  
-#
+* DB 설정과 이벤트 에미터, 카운트 등 모두 주석처리    
+
 #### node app.js
 * 카운트를 설정한 만큼 게시물을 크롤링 해오며 좋아요, 댓글, 리액션을 추가로 요청
 * model 설정에 따라서 디비에 적재 (예제는 좋아요,댓글,리액션을 한 객체에 담았다.)
 * 재귀를 사용한 크롤링 방식을 주석처리하고 prototype, Event Emitter를 사용
 * app.js는 간단한 초기설정만 적혀있고, 실질적인 크롤링 처리부분은 ./src/fb-post-v2.js에서 수행
-* fb-post-v2는 v1에서 오류가 발생했던 부분을 수정했고, [좋아요,댓글,리액션] 크롤링 방식을 개선  
-#
+* fb-post-v2는 v1에서 오류가 발생했던 부분을 수정했고, [좋아요,댓글,리액션] 크롤링 방식을 개선     
