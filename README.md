@@ -2,7 +2,7 @@
 Facebook API를 사용한 공개 페이지 게시물 크롤링
 
  * 최신 업데이트   
-## 2018년 3월 22일 페이스북 뉴스룸 - Cracking Down on Platform Abuse
+## 2018/03/22 facebook newsroom - Cracking Down on Platform Abuse
 페이스북은 플랫폼 남용으로부터 앱 사용자의 정보 보호를 위해 데이터 접근 권한을 더 강화하였다.
 크롤링을 위해 API 요청 시, 아래의 오류 정보가 뜬다면 최근 3개월간 사용하지 않은 앱에 대해서는 접근이 불가능하다는 것을 알려준다.
 ```
