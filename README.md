@@ -8,17 +8,17 @@ Facebook API를 사용한 공개 페이지 게시물 크롤링
 ```
 (#200) Access to this data is temporarily disabled for non-active apps or apps that have not recently accessed this data due to changes we are making to the Facebook Platform. https://developers.facebook.com/status/issues/205942813488872/'
 ```
-page 'post', 'feed' etc... deprecated (post, feed 기능은 중단될 것으로 보인다.
+page 'post', 'feed' etc... deprecated (post, feed 기능은 중단될 것으로 보인다)
    
-## deprecated 전 사용법  
+## 가이드  
 #### * Facebook Developers 페이지에서 Facebook 아이디와 시크릿 토큰을 발급    
 
 ```
 npm install
 - set facebook-config (원하는 config 설정 방식 사용)
 - [option] set db-config (원하는 db, config 설정, 예제는 mongoDB를 사용)
-node app.js or node index.js
-```   
+node app.js or node index.js  
+``` 
 
 ## 설정      
 
@@ -81,7 +81,8 @@ limit: 10
 * created_time : 포스팅 날짜
 * full_picture : 원본 사진
 * source : 동영상
-요청 시, 해당하는 속성이 없으면 반환하지 않는다.     
+* limit : 가져올 게시물 수 제한
+요청 시, 해당하는 속성이 없으면 반환하지 않는다.     
 
 #### node index.js
 * 기본적인 게시물 크롤링
@@ -94,3 +95,6 @@ limit: 10
 * 재귀를 사용한 크롤링 방식을 주석처리하고 prototype, Event Emitter를 사용
 * app.js는 간단한 초기설정만 적혀있고, 실질적인 크롤링 처리부분은 ./src/fb-post-v2.js에서 수행
 * fb-post-v2는 v1에서 오류가 발생했던 부분을 수정했고, [좋아요,댓글,리액션] 크롤링 방식을 개선     
+    
+## 개선이 필요한 사항
+node.js를 통한 비동기 실행의 이점으로 빠르게 데이터를 가져올 수 있다. 하지만 페이스북 데이터의 구조 특성상 모든 데이터는 id값을 요청 쿼리에 담아서 보내야 하기 때문에 많은 부가 데이터를 얻기 위해서는 (예를 들어, 한 게시물의 댓글,좋아요 또 그 좋아요를 누른 사람의 정보, 사진 정보, 공유 정보 등) 꼬리에 꼬리를 무는 방식으로인해 많은 시간이 소요된다. 또한 비동기 특성상, 게시물과 부가정보는 독립적인 요청이기 때문에 원하는 기준(게시물수,날짜 등)에 맞춰 크롤링을 원한다면 동기화 문제도 고려해보아야 한다.
